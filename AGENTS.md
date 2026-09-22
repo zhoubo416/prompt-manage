@@ -69,7 +69,7 @@ Memory 记录项目开发过程中积累的经验和习惯,也是项目 Memory �
 
 - **系统整体设计** (`docs/design/00-system-design.md`) — 了解系统定位、第一版范围、子系统划分、Tenant 隔离、角色权限和关键取舍时阅读,改动跨子系统前先读这篇。
 - **数据模型** (`docs/design/01-data-model.md`) — 改动数据库表、字段、唯一约束、版本状态或调用记录结构时阅读。
-- **Prompt 对外 API** (`docs/design/02-prompt-api.md`) — 改动业务系统调用的接口、认证方式、返回字段或调用统计口径时阅读。
+- **Prompt 对外 API** (`docs/design/02-prompt-api.md`) — 改动业务系统调用的查询与维护接口、API Key 权限、返回字段、错误码、公共文档页或调用统计口径时阅读。
 - **管理后台** (`docs/design/03-web-console.md`) — 改动后台页面结构、页面职责和关键交互时阅读。
 - **服务端结构** (`docs/design/04-server-architecture.md`) — 改动目录划分、请求处理流程、认证与租户隔离实现、数据库访问方式时阅读。
 

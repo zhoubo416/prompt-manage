@@ -114,11 +114,12 @@
 | `name` | 便于识别的名称,例如 Production |
 | `key_prefix` | Key 前缀,用于识别和排查,例如 `pk_live_8f3a` |
 | `key_hash` | Key 的哈希值,校验时使用 |
+| `access` | `read` 只能查询,`write` 还能调用维护接口;默认 `read` |
 | `status` | `active` / `disabled` |
 | `last_used_at` | 最后使用时间 |
 | `created_at` | 创建时间 |
 
-不保存完整 Key 明文,完整 Key 只在创建成功后展示一次。删除 Key 之后,使用该 Key 的请求立即失效。
+不保存完整 Key 明文,完整 Key 只在创建成功后展示一次。删除 Key 之后,使用该 Key 的请求立即失效。`access` 默认是 `read`,新建 Key 时才需要显式选择写权限,存量 Key 不会因为新增维护接口自动变得可写。
 
 ## prompt_usage
 
@@ -150,5 +151,6 @@ tenants
 
 ## 修改历史
 
+- 2026-09-22 `api_keys` 增加 `access` 字段,区分只读和读写,默认只读。
 - 2026-09-22 补充 `accounts`、`sessions` 两张表,把 `users` 的职责收窄成成员关系,记录 `(account_id, tenant_id)` 唯一约束。
 - 2026-09-22 首次创建,记录第一版的数据表、字段职责和约束。

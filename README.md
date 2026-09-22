@@ -21,6 +21,8 @@
 
 - `GET /api/v1/prompts/{key}` 取最新发布版本
 - `GET /api/v1/prompts/{key}/versions/{version}` 取指定版本,包含已归档的历史版本
+- 列表、版本历史、分类查询,以及创建、修改、发布、删除 Prompt 的维护接口,让三方系统不登录也能管理 Prompt
+- 完整的接口说明和可复制的 curl 示例在 `/docs` 公共页面,不需要登录
 
 第一版不做:LLM 调用、Prompt 自动优化与评分、A/B Test、多模型对比、Token 成本统计、Trace、Agent、公共 Prompt、多级分类、Billing、Webhook。
 
@@ -74,6 +76,17 @@ curl http://localhost:3000/api/v1/prompts/customer-analysis \
 
 API Key 决定这次请求能看到哪个租户的数据,返回的正文保留 `{{变量}}` 占位,由业务系统自己替换。认证失败返回 401,找不到可用版本返回 404,这两种情况都不计入调用次数。
 
+API Key 分两档权限:只读 Key 只能查询,读写 Key 还能调用维护接口。接口列表、参数、请求响应示例和错误码都能在 `/docs` 页面查到。
+
+```bash
+# 用读写 Key 创建并发布一个 Prompt
+curl -X POST http://localhost:3000/api/v1/prompts \
+  -H "Authorization: Bearer pk_live_xxxxx" \
+  -H "content-type: application/json" \
+  -d '{"name":"客户信息分析","key":"customer-analysis","categoryName":"客户",
+       "content":"请分析 {{customer_info}}","publish":true}'
+```
+
 ## 页面
 
 | 路由 | 页面 |
@@ -86,6 +99,7 @@ API Key 决定这次请求能看到哪个租户的数据,返回的正文保留 `
 | `/categories` | 分类管理 |
 | `/api-keys` | API Key 管理 |
 | `/analytics` | Usage 统计 |
+| `/docs` | 公共接口文档,不需要登录 |
 
 ## 目录结构
 

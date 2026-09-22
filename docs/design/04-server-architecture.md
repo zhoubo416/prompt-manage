@@ -16,6 +16,8 @@
 
 `shared/` 里的东西必须是纯函数:同一份变量识别逻辑同时给编辑页预览和对外接口使用,两边口径才不会漂移。
 
+写入规则只实现一次:`server/utils/versioning.ts` 管版本保存与发布,`server/utils/categories.ts` 管分类的增删改查和删除时的迁移,`server/utils/errors.ts` 定义业务错误码。管理后台的接口和 `/api/v1` 的维护接口都调用这几个模块,区别只在认证方式,不各写一套。
+
 ## 一个管理请求的流程
 
 ```text
@@ -56,6 +58,20 @@ HTTP 请求 /api/prompts
 - 路径参数统一用 `requireParam` 取,拿到的一定是字符串;请求体字段由 `server/utils/validation.ts` 里的 `assert*` 校验。
 - 迁移按文件名顺序执行,执行记录写在 `schema_migrations`,已执行过的文件不重复跑,因此迁移文件只增不改。
 
+## 错误响应
+
+`server/error-handler.ts` 统一接管错误输出,`nuxt.config.ts` 里的 `nitro.errorHandler` 指向它。默认行为会把堆栈和本机文件路径一起返回,并且把自定义数据塞在 `data` 里;这里收敛成固定结构:
+
+```json
+{ "statusCode": 401, "statusMessage": "缺少 API Key",
+  "error": { "code": "unauthorized", "message": "缺少 API Key" } }
+```
+
+- `statusCode` 和 `statusMessage` 保留,控制台前端靠它们显示提示。
+- `error.code` 是对外契约的一部分,取值见 `02-prompt-api.md`。
+- 未预期的 500 一律返回固定文案,细节只写到服务端日志,不外泄。
+
 ## 修改历史
 
+- 2026-09-22 补充共享写入模块、统一错误响应和迁移只增不改的说明。
 - 2026-09-22 首次创建,记录第一版的目录划分、请求流程、租户隔离和版本写入规则。
