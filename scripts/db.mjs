@@ -10,7 +10,9 @@ export function connect() {
   if (!url) {
     throw new Error('缺少 DATABASE_URL,请确认 .env 存在')
   }
-  return postgres(url, { ssl: 'require', max: 2 })
+  // onnotice 关掉:create table if not exists 这类语句会发 "already exists, skipping" 的通知,
+  // 打出来只是噪音,真正的错误仍然会以异常抛出
+  return postgres(url, { ssl: 'require', max: 2, onnotice: () => {} })
 }
 
 export async function hashPassword(password) {

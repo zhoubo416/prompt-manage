@@ -3,21 +3,23 @@ const { data, refresh } = await useFetch('/api/api-keys')
 const apiKeys = computed(() => data.value?.apiKeys ?? [])
 
 const name = ref('')
+const access = ref<'read' | 'write'>('read')
 const message = ref('')
 const busy = ref(false)
-const issued = ref<{ name: string, key: string } | null>(null)
+const issued = ref<{ name: string, key: string, access: 'read' | 'write' } | null>(null)
 const copied = ref(false)
 
 async function create() {
   busy.value = true
   message.value = ''
   try {
-    const created = await $fetch<{ name: string, key: string }>('/api/api-keys', {
+    const created = await $fetch<{ name: string, key: string, access: 'read' | 'write' }>('/api/api-keys', {
       method: 'POST',
-      body: { name: name.value },
+      body: { name: name.value, access: access.value },
     })
-    issued.value = { name: created.name, key: created.key }
+    issued.value = { name: created.name, key: created.key, access: created.access }
     name.value = ''
+    access.value = 'read'
     copied.value = false
     await refresh()
   } catch (error) {
@@ -79,8 +81,15 @@ async function copyKey() {
       <h2 class="text-sm font-semibold text-ink-800">创建 API Key</h2>
       <div class="mt-3 flex flex-wrap gap-3">
         <input v-model="name" class="field w-56" placeholder="名称,例如 Production">
+        <select v-model="access" class="field w-44">
+          <option value="read">只读,只能查询</option>
+          <option value="write">读写,可以维护</option>
+        </select>
         <button class="btn-primary" :disabled="busy || !name.trim()" @click="create">生成</button>
       </div>
+      <p class="mt-2 text-xs text-ink-400">
+        只读 Key 能查询 Prompt;读写 Key 还能调用维护接口创建、修改、发布和删除 Prompt。
+      </p>
     </section>
 
     <div class="card overflow-hidden">
@@ -89,6 +98,7 @@ async function copyKey() {
           <tr>
             <th class="px-4 py-2.5 font-medium">名称</th>
             <th class="px-4 py-2.5 font-medium">Key 前缀</th>
+            <th class="px-4 py-2.5 font-medium">权限</th>
             <th class="px-4 py-2.5 font-medium">创建时间</th>
             <th class="px-4 py-2.5 font-medium">最后使用</th>
             <th class="px-4 py-2.5 font-medium">状态</th>
@@ -99,6 +109,14 @@ async function copyKey() {
           <tr v-for="item in apiKeys" :key="item.id" class="border-t border-ink-100">
             <td class="px-4 py-3 font-medium">{{ item.name }}</td>
             <td class="px-4 py-3 font-mono text-xs text-ink-600">{{ item.keyPrefix }}…</td>
+            <td class="px-4 py-3">
+              <span
+                class="badge"
+                :class="item.access === 'write' ? 'bg-accent-500/10 text-accent-600' : 'bg-ink-100 text-ink-600'"
+              >
+                {{ item.access }}
+              </span>
+            </td>
             <td class="px-4 py-3 text-ink-400">{{ formatDate(item.createdAt) }}</td>
             <td class="px-4 py-3 text-ink-400">{{ formatRelative(item.lastUsedAt) }}</td>
             <td class="px-4 py-3">
@@ -119,7 +137,7 @@ async function copyKey() {
             </td>
           </tr>
           <tr v-if="apiKeys.length === 0">
-            <td colspan="6" class="px-4 py-10 text-center text-sm text-ink-400">
+            <td colspan="7" class="px-4 py-10 text-center text-sm text-ink-400">
               还没有 API Key
             </td>
           </tr>
@@ -132,6 +150,9 @@ async function copyKey() {
         <h3 class="text-base font-semibold">API Key 创建成功</h3>
         <p class="mt-2 text-sm text-ink-600">
           完整 Key 只显示这一次,离开这个弹窗后就看不到了,请先保存到安全的地方。
+        </p>
+        <p class="mt-1 text-sm text-ink-600">
+          权限:<span class="badge" :class="issued.access === 'write' ? 'bg-accent-500/10 text-accent-600' : 'bg-ink-100 text-ink-600'">{{ issued.access }}</span>
         </p>
         <pre class="mt-3 overflow-auto rounded-lg bg-ink-900 p-3 text-xs text-ink-100">{{ issued.key }}</pre>
         <div class="mt-5 flex justify-end gap-2">

@@ -6,19 +6,9 @@ import { normalizeVariables } from '#shared/template'
  */
 export default defineEventHandler(async (event) => {
   const startedAt = Date.now()
-  const key = requireParam(event, 'key')
-  const token = readBearerToken(getHeader(event, 'authorization'))
-  if (!token) {
-    throw createError({ statusCode: 401, statusMessage: '缺少 API Key' })
-  }
-
+  const promptKey = requireParam(event, 'key')
+  const apiKey = await requireApiKey(event)
   const sql = useDb()
-  const [apiKey] = await sql<{ id: string, tenant_id: string, status: string }[]>`
-    select id, tenant_id, status from api_keys where key_hash = ${hashApiKey(token)}
-  `
-  if (!apiKey || apiKey.status !== 'active') {
-    throw createError({ statusCode: 401, statusMessage: 'API Key 无效或已禁用' })
-  }
 
   const [row] = await sql<{
     id: string
@@ -31,14 +21,14 @@ export default defineEventHandler(async (event) => {
     select p.id, p.name, p.key, v.version, v.content, v.variables
     from prompts p
     join prompt_versions v on v.prompt_id = p.id and v.status = 'published'
-    where p.tenant_id = ${apiKey.tenant_id} and p.key = ${key}
+    where p.tenant_id = ${apiKey.tenantId} and p.key = ${promptKey}
   `
   if (!row) {
-    throw createError({ statusCode: 404, statusMessage: '找不到该 Prompt 的可用版本' })
+    apiError('not_found', '找不到该 Prompt 的可用版本')
   }
 
   await recordUsage(sql, {
-    tenantId: apiKey.tenant_id,
+    tenantId: apiKey.tenantId,
     promptId: row.id,
     version: row.version,
     apiKeyId: apiKey.id,

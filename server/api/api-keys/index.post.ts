@@ -1,13 +1,14 @@
 export default defineEventHandler(async (event) => {
   const session = await requireRole(event, 'admin')
-  const body = await readBody<{ name?: string }>(event)
+  const body = await readBody<{ name?: string, access?: string }>(event)
   const name = assertText(body?.name, 'API Key 名称', 60)
+  const access = body?.access === 'write' ? 'write' : 'read'
   const issued = generateApiKey()
   const sql = useDb()
 
   const [row] = await sql<{ id: string }[]>`
-    insert into api_keys (tenant_id, name, key_prefix, key_hash)
-    values (${session.tenantId}, ${name}, ${issued.prefix}, ${issued.hash})
+    insert into api_keys (tenant_id, name, key_prefix, key_hash, access)
+    values (${session.tenantId}, ${name}, ${issued.prefix}, ${issued.hash}, ${access})
     returning id
   `
   if (!row) {
@@ -15,5 +16,5 @@ export default defineEventHandler(async (event) => {
   }
 
   // 完整 Key 只在这里返回一次,数据库里只有前缀和哈希
-  return { id: row.id, name, key: issued.key, keyPrefix: issued.prefix }
+  return { id: row.id, name, key: issued.key, keyPrefix: issued.prefix, access }
 })

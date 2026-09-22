@@ -3,24 +3,14 @@ import { normalizeVariables } from '#shared/template'
 /** 对外接口:按指定版本号取 Prompt,供需要固定版本的业务使用 */
 export default defineEventHandler(async (event) => {
   const startedAt = Date.now()
-  const key = requireParam(event, 'key')
+  const promptKey = requireParam(event, 'key')
   const version = Number(requireParam(event, 'version'))
   if (!Number.isInteger(version) || version < 1) {
-    throw createError({ statusCode: 400, statusMessage: '版本号不合法' })
+    apiError('validation_failed', '版本号不合法')
   }
 
-  const token = readBearerToken(getHeader(event, 'authorization'))
-  if (!token) {
-    throw createError({ statusCode: 401, statusMessage: '缺少 API Key' })
-  }
-
+  const apiKey = await requireApiKey(event)
   const sql = useDb()
-  const [apiKey] = await sql<{ id: string, tenant_id: string, status: string }[]>`
-    select id, tenant_id, status from api_keys where key_hash = ${hashApiKey(token)}
-  `
-  if (!apiKey || apiKey.status !== 'active') {
-    throw createError({ statusCode: 401, statusMessage: 'API Key 无效或已禁用' })
-  }
 
   const [row] = await sql<{
     id: string
@@ -33,15 +23,15 @@ export default defineEventHandler(async (event) => {
     select p.id, p.name, p.key, v.version, v.content, v.variables
     from prompts p
     join prompt_versions v on v.prompt_id = p.id
-    where p.tenant_id = ${apiKey.tenant_id} and p.key = ${key}
+    where p.tenant_id = ${apiKey.tenantId} and p.key = ${promptKey}
       and v.version = ${version} and v.status in ('published', 'archived')
   `
   if (!row) {
-    throw createError({ statusCode: 404, statusMessage: '找不到该版本' })
+    apiError('not_found', '找不到该版本')
   }
 
   await recordUsage(sql, {
-    tenantId: apiKey.tenant_id,
+    tenantId: apiKey.tenantId,
     promptId: row.id,
     version: row.version,
     apiKeyId: apiKey.id,

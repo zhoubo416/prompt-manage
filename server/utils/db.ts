@@ -9,7 +9,8 @@ export function useDb(): postgres.Sql {
     if (!url) {
       throw new Error('缺少 DATABASE_URL,请确认 .env 存在')
     }
-    client = postgres(url, { ssl: 'require', max: 8 })
+    // 关掉 notice 通知(建表语句的 "already exists, skipping" 之类),异常仍然正常抛出
+    client = postgres(url, { ssl: 'require', max: 8, onnotice: () => {} })
   }
   return client
 }

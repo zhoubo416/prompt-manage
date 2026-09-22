@@ -55,6 +55,19 @@ async function logout() {
           {{ item.label }}
         </NuxtLink>
       </nav>
+      <div class="mt-6 border-t border-ink-100 pt-3">
+        <a
+          href="/docs"
+          target="_blank"
+          rel="noopener"
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-600 transition hover:bg-ink-50"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 6.5A5.5 5.5 0 0 1 17.5 12M6.5 12A5.5 5.5 0 0 1 12 6.5M12 17.5A5.5 5.5 0 0 1 6.5 12M17.5 12A5.5 5.5 0 0 1 12 17.5" />
+          </svg>
+          接口文档
+        </a>
+      </div>
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
