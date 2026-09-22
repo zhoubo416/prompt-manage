@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --color-ink-50: #f6f7f9;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #d8dce4;
+  --color-ink-400: #8b93a5;
+  --color-ink-600: #4a5265;
+  --color-ink-800: #232936;
+  --color-ink-900: #161a24;
+  --color-accent-500: #4f46e5;
+  --color-accent-600: #4338ca;
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 antialiased;
+}
+
+@utility card {
+  @apply rounded-xl border border-ink-200 bg-white;
+}
+
+@utility field {
+  @apply w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/15;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-accent-500 text-white hover:bg-accent-600;
+}
+
+@utility btn-ghost {
+  @apply btn border border-ink-200 bg-white text-ink-600 hover:bg-ink-50;
+}
+
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+}

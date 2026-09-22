@@ -1,0 +1,7 @@
+# pnpm 11 的依赖设置放在 workspace 文件里,package.json 的 pnpm 字段已不再读取。
+# 依赖的安装脚本默认一律禁止执行,这里只放行审查过的 esbuild 0.28.2:
+# 它的 postinstall(node install.js)会校验平台二进制并写入自己包目录下的 shim,
+# 只有在本机找不到 @esbuild/<platform> 时才会去 registry.npmjs.org 下载。
+# 本次安装没有出现下载行为,新增其它允许项之前要按 docs/memory/dependency-management.md 走一遍审查。
+allowBuilds:
+  esbuild: true
