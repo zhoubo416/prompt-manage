@@ -25,7 +25,10 @@ describe('对外接口清单', () => {
 
   it('server/api/v1 下没有漏登记的接口', () => {
     const documented = new Set(apiEndpoints.map(item => item.routeFile))
-    const undocumented = v1RouteFiles().filter(file => !documented.has(file))
+    // [...].ts 是没匹配到路由时的兜底,不是接口,不需要登记
+    const undocumented = v1RouteFiles()
+      .filter(file => !file.endsWith('/[...].ts'))
+      .filter(file => !documented.has(file))
     expect(undocumented, `这些接口还没登记到 shared/api-catalog.ts:${undocumented.join(', ')}`).toEqual([])
   })
 

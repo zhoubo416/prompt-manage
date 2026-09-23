@@ -234,6 +234,9 @@ const authExample = `curl "${baseUrl}/api/v1/prompts/customer-analysis" \\
   "statusMessage": "当前 API Key 只有查询权限",
   "error": { "code": "forbidden", "message": "当前 API Key 只有查询权限" }
 }</pre>
+        <p class="mt-3 text-xs text-ink-400">
+          路径写错时同样返回 JSON 404 <code class="rounded bg-ink-100 px-1 py-0.5">not_found</code>,不会返回 HTML 页面。
+        </p>
       </section>
 
       <section class="card p-5">

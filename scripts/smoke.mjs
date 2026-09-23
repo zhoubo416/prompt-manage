@@ -164,6 +164,12 @@ async function main() {
   const anonymous = await call('/api/v1/prompts')
   assert(anonymous.status === 401 && anonymous.data?.error?.code === 'unauthorized', '没有 Key 时返回 unauthorized')
 
+  const unknownPath = await call('/api/v1/not-a-real-endpoint', { anonymous: true })
+  assert(
+    unknownPath.status === 404 && unknownPath.data?.error?.code === 'not_found',
+    '不存在的接口路径返回 JSON 404,而不是页面 HTML',
+  )
+
   const externalList = await call('/api/v1/prompts?limit=5', { headers: { authorization: `Bearer ${readKey}` }, anonymous: true })
   assert(externalList.status === 200 && externalList.data?.total >= 1, '只读 Key 可以列出 Prompt')
   assert(externalList.data?.prompts?.length <= 5, 'limit 生效')
